@@ -4,6 +4,7 @@ import { useActionState, useState } from "react"
 import { Plus, Trash2 } from "lucide-react"
 
 import { enrollChild, updateChild, type FormState } from "@/app/(app)/admin/actions"
+import { downscaleInputFiles } from "@/lib/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -55,6 +56,8 @@ export function ChildForm({
       pin: p.pin ?? "",
     })) ?? []
   )
+
+  const [photoBusy, setPhotoBusy] = useState(false)
 
   const cleanContacts = contacts.filter((c) => c.name.trim() && c.phone.trim())
   const cleanPickups = pickups.filter((p) => p.name.trim())
@@ -134,7 +137,18 @@ export function ChildForm({
           </div>
           <div className="grid gap-2">
             <Label htmlFor="photo">Photo</Label>
-            <Input id="photo" name="photo" type="file" accept="image/*" />
+            <Input
+              id="photo"
+              name="photo"
+              type="file"
+              accept="image/*"
+              onChange={async (e) => {
+                const el = e.currentTarget
+                setPhotoBusy(true)
+                await downscaleInputFiles(el)
+                setPhotoBusy(false)
+              }}
+            />
             {isEdit && child?.photo_url ? (
               <p className="text-xs text-muted-foreground">
                 A photo is on file. Uploading a new one replaces it.
@@ -327,8 +341,14 @@ export function ChildForm({
       ) : null}
 
       <div className="flex justify-end gap-2">
-        <Button type="submit" size="lg" disabled={pending}>
-          {pending ? "Saving…" : isEdit ? "Save changes" : "Enroll child"}
+        <Button type="submit" size="lg" disabled={pending || photoBusy}>
+          {photoBusy
+            ? "Processing photo…"
+            : pending
+              ? "Saving…"
+              : isEdit
+                ? "Save changes"
+                : "Enroll child"}
         </Button>
       </div>
     </form>

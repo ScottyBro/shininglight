@@ -9,6 +9,7 @@ import {
 } from "@/app/(app)/teacher/reports/actions"
 import { draftReportSummary } from "@/app/(app)/teacher/reports/ai-actions"
 import { enqueue } from "@/lib/offline/queue"
+import { downscaleInputFiles } from "@/lib/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -51,6 +52,7 @@ export function DailyReportForm({
   const [aiError, setAiError] = useState<string | null>(null)
   const [aiPending, startAi] = useTransition()
   const [offlineMsg, setOfflineMsg] = useState<string | null>(null)
+  const [photoBusy, setPhotoBusy] = useState(false)
 
   // Offline: queue the report as a draft (text only) to replay on reconnect.
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -418,7 +420,18 @@ export function DailyReportForm({
               ))}
             </div>
           ) : null}
-          <Input name="photos" type="file" accept="image/*" multiple />
+          <Input
+            name="photos"
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={async (e) => {
+              const el = e.currentTarget
+              setPhotoBusy(true)
+              await downscaleInputFiles(el)
+              setPhotoBusy(false)
+            }}
+          />
           <p className="text-xs text-muted-foreground">
             Photos are only visible to the child&apos;s family once published.
           </p>
@@ -449,9 +462,9 @@ export function DailyReportForm({
           variant="outline"
           size="lg"
           className="flex-1"
-          disabled={pending}
+          disabled={pending || photoBusy}
         >
-          Save draft
+          {photoBusy ? "Processing…" : "Save draft"}
         </Button>
         <Button
           type="submit"
@@ -459,9 +472,9 @@ export function DailyReportForm({
           value="publish"
           size="lg"
           className="flex-1"
-          disabled={pending}
+          disabled={pending || photoBusy}
         >
-          {pending ? "Saving…" : "Publish to family"}
+          {photoBusy ? "Processing…" : pending ? "Saving…" : "Publish to family"}
         </Button>
       </div>
     </form>
