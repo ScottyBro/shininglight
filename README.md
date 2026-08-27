@@ -83,9 +83,31 @@ cloud Supabase project.
    email" for faster testing so sign-up logs you straight in.
 5. `npm run dev` and open http://localhost:3000.
 
-> **First admin account:** sign up and choose "Administrator" on the sign-up
-> form (a bootstrap convenience). In production, lock public sign-up to
-> `parent` and create staff from the Admin console.
+> **Accounts are admin-created — there is no public sign-up.** Bootstrap the
+> first admin (and a full set of demo accounts + data) with the seed script
+> below; after that, admins create staff and parents from **Admin → People →
+> Create an account**.
+
+## Demo accounts & data
+
+Seed login-able demo accounts and a realistic dataset (classroom, children with
+allergies/pickups, attendance, published reports, invoices/payments, messages)
+straight into your project:
+
+```bash
+node --env-file=.env.local scripts/seed-demo.mjs
+```
+
+It uses the service-role key from `.env.local`, is idempotent (safe to re-run —
+it resets the demo passwords and upserts data), and prints the accounts when
+done. All demo accounts share the password **`ShiningLight1!`**:
+
+| Role    | Email                          |
+| ------- | ------------------------------ |
+| Admin   | `admin@shininglight.co`        |
+| Teacher | `teacher@shininglight.co`      |
+| Parent  | `tanaka.parent@shininglight.co` (2 children) |
+| Parent  | `farai.parent@shininglight.co`  |
 
 > Local sign-up is configured to **not** require email confirmation
 > (`supabase/config.toml`), so creating an account signs you straight in — handy

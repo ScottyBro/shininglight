@@ -1,6 +1,7 @@
 import { requireRole } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
 import { PageHeader } from "@/components/page-header"
+import { CreateUser } from "@/components/admin/create-user"
 import { PeopleLink } from "@/components/admin/people-link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -32,6 +33,8 @@ export default async function PeoplePage() {
       />
 
       <div className="grid gap-4">
+        <CreateUser />
+
         <PeopleLink
           parents={parents.map((p) => ({ id: p.id, full_name: p.full_name }))}
           childOptions={children ?? []}

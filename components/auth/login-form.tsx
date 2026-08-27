@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { useActionState } from "react"
 
 import { login, type AuthState } from "@/app/auth/actions"
@@ -51,10 +50,8 @@ export function LoginForm() {
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
-        New here?{" "}
-        <Link href="/signup" className="font-medium text-primary hover:underline">
-          Create an account
-        </Link>
+        Accounts are created by the school. Contact the office if you need
+        access.
       </p>
     </form>
   )

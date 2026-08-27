@@ -17,14 +17,9 @@ export default async function Home() {
               <Link href={homePathForRole(profile.role)}>Open app</Link>
             </Button>
           ) : (
-            <>
-              <Button asChild variant="ghost">
-                <Link href="/login">Sign in</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/signup">Get started</Link>
-              </Button>
-            </>
+            <Button asChild>
+              <Link href="/login">Sign in</Link>
+            </Button>
           )}
         </div>
       </header>
@@ -39,11 +34,8 @@ export default async function Home() {
             gentle, mobile-first place for teachers and parents.
           </p>
           {!profile ? (
-            <div className="mt-8 flex justify-center gap-3">
+            <div className="mt-8 flex justify-center">
               <Button asChild size="lg">
-                <Link href="/signup">Create an account</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
                 <Link href="/login">Sign in</Link>
               </Button>
             </div>

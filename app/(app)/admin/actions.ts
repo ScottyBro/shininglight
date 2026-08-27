@@ -5,11 +5,79 @@ import { redirect } from "next/navigation"
 import { z } from "zod"
 
 import { requireRole } from "@/lib/auth"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient, createClient } from "@/lib/supabase/server"
 import { parseList } from "@/lib/format"
 import type { Database, EnrollmentStatus } from "@/lib/types/database"
 
 export type FormState = { error?: string; message?: string }
+
+// --- User accounts (admin-created; there is no public sign-up) -------------
+
+const emailField = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.email("Enter a valid email address."))
+
+const createUserSchema = z.object({
+  full_name: z.string().trim().min(2, "Enter the person's full name."),
+  email: emailField,
+  phone: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v ? v : null)),
+  role: z.enum(["admin", "teacher", "parent"]),
+  password: z.string().min(8, "Temporary password must be at least 8 characters."),
+})
+
+/**
+ * Create a staff or parent account. Accounts are only ever created here by an
+ * admin (public sign-up is disabled). Uses the service-role client to create a
+ * confirmed auth user; the handle_new_user trigger + this upsert set the
+ * profile's role/name/phone.
+ */
+export async function createUserAccount(
+  _prev: FormState,
+  formData: FormData
+): Promise<FormState> {
+  await requireRole("admin")
+
+  const parsed = createUserSchema.safeParse({
+    full_name: formData.get("full_name"),
+    email: formData.get("email"),
+    phone: formData.get("phone") ?? undefined,
+    role: formData.get("role"),
+    password: formData.get("password"),
+  })
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input." }
+  }
+
+  const { email, password, full_name, phone, role } = parsed.data
+  const admin = createAdminClient()
+
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { full_name, phone, role },
+  })
+  if (error || !data.user) {
+    return { error: error?.message ?? "Could not create the account." }
+  }
+
+  // Ensure the profile matches (the trigger creates it; this makes role/name
+  // authoritative even if metadata handling ever changes).
+  await admin
+    .from("profiles")
+    .upsert({ id: data.user.id, role, full_name, phone }, { onConflict: "id" })
+
+  revalidatePath("/admin/people")
+  return {
+    message: `Account created for ${email}. Share the temporary password so they can sign in.`,
+  }
+}
 
 // --- Shared validation ------------------------------------------------------
 
