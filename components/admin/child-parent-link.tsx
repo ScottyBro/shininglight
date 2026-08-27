@@ -40,6 +40,10 @@ export function ChildParentLink({
   const [state, formAction, pending] = useActionState(linkParent, initialState)
   const linkedIds = new Set(linked.map((l) => l.parent?.id))
   const available = parents.filter((p) => !linkedIds.has(p.id))
+  // Without an `items` value->label map, Base UI's Select shows the raw id.
+  const parentItems: Record<string, string> = Object.fromEntries(
+    available.map((p) => [p.id, p.full_name ?? "Unnamed parent"])
+  )
 
   return (
     <Card>
@@ -93,7 +97,7 @@ export function ChildParentLink({
             <input type="hidden" name="child_id" value={childId} />
             <div className="grid gap-2">
               <Label htmlFor="parent_id">Add a parent</Label>
-              <Select name="parent_id">
+              <Select name="parent_id" items={parentItems}>
                 <SelectTrigger id="parent_id" className="w-full">
                   <SelectValue placeholder="Choose a parent" />
                 </SelectTrigger>

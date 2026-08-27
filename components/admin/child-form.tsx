@@ -62,6 +62,18 @@ export function ChildForm({
   const cleanContacts = contacts.filter((c) => c.name.trim() && c.phone.trim())
   const cleanPickups = pickups.filter((p) => p.name.trim())
 
+  // Base UI's Select shows the raw `value` in the trigger unless given an
+  // `items` value->label map — without it these would show ids/enum values.
+  const classroomItems: Record<string, string> = {
+    none: "Unassigned",
+    ...Object.fromEntries(classrooms.map((c) => [c.id, c.name])),
+  }
+  const statusItems: Record<string, string> = {
+    active: "Active",
+    waitlisted: "Waitlisted",
+    withdrawn: "Withdrawn",
+  }
+
   return (
     <form action={formAction} className="grid gap-6">
       {isEdit ? <input type="hidden" name="id" value={child!.id} /> : null}
@@ -105,6 +117,7 @@ export function ChildForm({
             <Select
               name="classroom_id"
               defaultValue={child?.classroom_id ?? "none"}
+              items={classroomItems}
             >
               <SelectTrigger id="classroom_id" className="w-full">
                 <SelectValue placeholder="Unassigned" />
@@ -124,6 +137,7 @@ export function ChildForm({
             <Select
               name="enrollment_status"
               defaultValue={child?.enrollment_status ?? "active"}
+              items={statusItems}
             >
               <SelectTrigger id="enrollment_status" className="w-full">
                 <SelectValue />

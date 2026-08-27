@@ -21,6 +21,13 @@ import {
 
 const initial: MessageState = {}
 
+// Without an `items` value->label map, Base UI's Select shows the raw value.
+const LANGUAGE_ITEMS: Record<string, string> = {
+  en: "English",
+  sn: "Shona",
+  nd: "Ndebele",
+}
+
 export function MessageCompose({
   childId,
   enableAi = false,
@@ -76,6 +83,7 @@ export function MessageCompose({
             {aiPending ? "Working…" : "Draft with AI"}
           </Button>
           <Select
+            items={LANGUAGE_ITEMS}
             onValueChange={(v) => translate(typeof v === "string" ? v : "en")}
           >
             <SelectTrigger size="sm" className="w-auto gap-1" aria-label="Translate">

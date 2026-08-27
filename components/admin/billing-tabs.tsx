@@ -74,6 +74,12 @@ type Balance = {
 
 const initial: BillingState = {}
 const CYCLE_LABEL = { monthly: "Monthly", termly: "Termly", annual: "Annual" }
+const METHOD_ITEMS: Record<string, string> = {
+  cash: "Cash",
+  ecocash: "EcoCash",
+  bank_transfer: "Bank transfer",
+  other: "Other",
+}
 
 export function BillingTabs({
   feePlans,
@@ -311,6 +317,14 @@ function GenerateInvoices({
   classrooms: { id: string; name: string }[]
 }) {
   const [state, action, pending] = useActionState(generateInvoices, initial)
+  // Without an `items` value->label map, Base UI's Select shows the raw id.
+  const feePlanItems: Record<string, string> = Object.fromEntries(
+    feePlans.map((p) => [p.id, `${p.name} — ${currency(p.amount)}`])
+  )
+  const classroomItems: Record<string, string> = {
+    all: "All active children",
+    ...Object.fromEntries(classrooms.map((c) => [c.id, c.name])),
+  }
   return (
     <Card>
       <CardHeader>
@@ -325,7 +339,7 @@ function GenerateInvoices({
           <form action={action} className="grid gap-3 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="fee_plan_id">Fee plan</Label>
-              <Select name="fee_plan_id">
+              <Select name="fee_plan_id" items={feePlanItems}>
                 <SelectTrigger id="fee_plan_id" className="w-full">
                   <SelectValue placeholder="Choose a plan" />
                 </SelectTrigger>
@@ -340,7 +354,7 @@ function GenerateInvoices({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="classroom_id">For</Label>
-              <Select name="classroom_id" defaultValue="all">
+              <Select name="classroom_id" defaultValue="all" items={classroomItems}>
                 <SelectTrigger id="classroom_id" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -407,7 +421,7 @@ function FeePlanForm() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="billing_cycle">Cycle</Label>
-            <Select name="billing_cycle" defaultValue="monthly">
+            <Select name="billing_cycle" defaultValue="monthly" items={CYCLE_LABEL}>
               <SelectTrigger id="billing_cycle" className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -473,7 +487,7 @@ function RecordPaymentDialog({ inv }: { inv: InvoiceRow }) {
             </div>
             <div className="grid gap-2">
               <Label htmlFor={`method-${inv.id}`}>Method</Label>
-              <Select name="method" defaultValue="cash">
+              <Select name="method" defaultValue="cash" items={METHOD_ITEMS}>
                 <SelectTrigger id={`method-${inv.id}`} className="w-full">
                   <SelectValue />
                 </SelectTrigger>

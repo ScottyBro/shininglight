@@ -17,6 +17,13 @@ import {
 
 const initial: FormState = {}
 
+// Without an `items` value->label map, Base UI's Select shows the raw value.
+const ROLE_ITEMS: Record<string, string> = {
+  parent: "Parent / Guardian",
+  teacher: "Teacher",
+  admin: "Administrator",
+}
+
 export function CreateUser() {
   const [state, action, pending] = useActionState(createUserAccount, initial)
   const formRef = useRef<HTMLFormElement>(null)
@@ -56,7 +63,7 @@ export function CreateUser() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="cu_role">Role</Label>
-            <Select name="role" defaultValue="parent">
+            <Select name="role" defaultValue="parent" items={ROLE_ITEMS}>
               <SelectTrigger id="cu_role" className="w-full">
                 <SelectValue />
               </SelectTrigger>

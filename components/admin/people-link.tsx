@@ -25,6 +25,13 @@ export function PeopleLink({
   childOptions: { id: string; full_name: string }[]
 }) {
   const [state, formAction, pending] = useActionState(linkParent, initialState)
+  // Without an `items` value->label map, Base UI's Select shows the raw id.
+  const parentItems: Record<string, string> = Object.fromEntries(
+    parents.map((p) => [p.id, p.full_name ?? "Unnamed parent"])
+  )
+  const childItems: Record<string, string> = Object.fromEntries(
+    childOptions.map((c) => [c.id, c.full_name])
+  )
 
   return (
     <Card>
@@ -44,7 +51,7 @@ export function PeopleLink({
           >
             <div className="grid gap-2">
               <Label htmlFor="parent_id">Parent</Label>
-              <Select name="parent_id">
+              <Select name="parent_id" items={parentItems}>
                 <SelectTrigger id="parent_id" className="w-full">
                   <SelectValue placeholder="Choose a parent" />
                 </SelectTrigger>
@@ -59,7 +66,7 @@ export function PeopleLink({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="child_id">Child</Label>
-              <Select name="child_id">
+              <Select name="child_id" items={childItems}>
                 <SelectTrigger id="child_id" className="w-full">
                   <SelectValue placeholder="Choose a child" />
                 </SelectTrigger>

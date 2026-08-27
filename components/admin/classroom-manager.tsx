@@ -45,6 +45,14 @@ export function ClassroomManager({
     initialState
   )
 
+  // Base UI's Select only shows the raw `value` in the trigger unless an
+  // `items` value->label map is given — without it every select here would
+  // display a teacher's raw id instead of their name.
+  const teacherItems: Record<string, string> = {
+    none: "Unassigned",
+    ...Object.fromEntries(teachers.map((t) => [t.id, t.full_name ?? "Unnamed teacher"])),
+  }
+
   return (
     <div className="grid gap-6">
       <Card>
@@ -72,7 +80,7 @@ export function ClassroomManager({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="teacher_id">Lead teacher</Label>
-              <Select name="teacher_id" defaultValue="none">
+              <Select name="teacher_id" defaultValue="none" items={teacherItems}>
                 <SelectTrigger id="teacher_id" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -121,6 +129,7 @@ export function ClassroomManager({
                     <Select
                       defaultValue={room.teacher_id ?? "none"}
                       onValueChange={(v) => assignTeacher(room.id, v ?? "none")}
+                      items={teacherItems}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Unassigned" />
