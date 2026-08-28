@@ -34,9 +34,15 @@ export async function updateSession(request: NextRequest) {
   )
 
   // IMPORTANT: do not run code between createServerClient and getUser().
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Bounded so a slow/unreachable Supabase can never hang the whole site:
+  // Vercel Edge Middleware has a hard ~25s invocation timeout, and blowing
+  // past it turns into a 504 for every request. Timing out here instead
+  // degrades to "treat as signed out" for routing purposes only — RLS still
+  // protects the data regardless, so this never widens access.
+  const user = await Promise.race([
+    supabase.auth.getUser().then((r) => r.data.user),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
+  ])
 
   const { pathname } = request.nextUrl
 
