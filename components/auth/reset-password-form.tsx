@@ -1,6 +1,7 @@
 "use client"
 
 import { useActionState } from "react"
+import { Loader2 } from "lucide-react"
 
 import { updatePassword, type AuthState } from "@/app/auth/actions"
 import { Button } from "@/components/ui/button"
@@ -47,7 +48,14 @@ export function ResetPasswordForm() {
       ) : null}
 
       <Button type="submit" size="lg" className="mt-2 w-full" disabled={pending}>
-        {pending ? "Saving…" : "Set new password"}
+        {pending ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            Saving…
+          </>
+        ) : (
+          "Set new password"
+        )}
       </Button>
     </form>
   )

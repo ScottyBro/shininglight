@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useActionState } from "react"
+import { Loader2 } from "lucide-react"
 
 import { requestPasswordReset, type AuthState } from "@/app/auth/actions"
 import { Button } from "@/components/ui/button"
@@ -51,7 +52,14 @@ export function ForgotPasswordForm() {
       ) : null}
 
       <Button type="submit" size="lg" className="mt-2 w-full" disabled={pending}>
-        {pending ? "Sending…" : "Send reset link"}
+        {pending ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            Sending…
+          </>
+        ) : (
+          "Send reset link"
+        )}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
