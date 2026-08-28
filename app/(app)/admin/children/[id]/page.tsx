@@ -9,6 +9,7 @@ import { ChildAvatar } from "@/components/child-avatar"
 import { ChildSafetyBadges } from "@/components/child-badges"
 import { ChildForm } from "@/components/admin/child-form"
 import { ChildParentLink } from "@/components/admin/child-parent-link"
+import { EnrollmentStatusMenu } from "@/components/admin/enrollment-status-menu"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -61,17 +62,11 @@ export default async function ChildDetailPage({
 
   return (
     <>
-      <PageHeader
-        title={c.full_name}
-        description={
-          [ageLabel(c.date_of_birth), c.enrollment_status]
-            .filter(Boolean)
-            .join(" · ")
-        }
-      />
+      <PageHeader title={c.full_name} description={ageLabel(c.date_of_birth) ?? undefined} />
 
-      <div className="mb-5 flex items-center gap-4">
+      <div className="mb-5 flex flex-wrap items-center gap-4">
         <ChildAvatar name={c.full_name} photoPath={c.photo_url} className="size-16" />
+        <EnrollmentStatusMenu childId={c.id} status={c.enrollment_status} />
         <ChildSafetyBadges allergies={c.allergies} medicalNotes={c.medical_notes} />
       </div>
 

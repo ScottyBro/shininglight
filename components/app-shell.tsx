@@ -35,15 +35,25 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/")
 }
 
+function NavBadge({ count }: { count: number }) {
+  return (
+    <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold text-destructive-foreground">
+      {count > 9 ? "9+" : count}
+    </span>
+  )
+}
+
 export function AppShell({
   role,
   fullName,
   navItems,
+  badges,
   children,
 }: {
   role: UserRole
   fullName: string | null
   navItems: NavItem[]
+  badges?: Record<string, number>
   children: React.ReactNode
 }) {
   const pathname = usePathname()
@@ -69,6 +79,7 @@ export function AppShell({
             >
               <NavIcon name={item.icon} className="size-5" />
               {item.label}
+              {badges?.[item.href] ? <NavBadge count={badges[item.href]} /> : null}
             </Link>
           ))}
         </nav>
@@ -107,13 +118,20 @@ export function AppShell({
             key={item.href}
             href={item.href}
             className={cn(
-              "flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium",
+              "relative flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium",
               isActive(pathname, item.href)
                 ? "text-primary"
                 : "text-muted-foreground"
             )}
           >
-            <NavIcon name={item.icon} className="size-6" />
+            <span className="relative">
+              <NavIcon name={item.icon} className="size-6" />
+              {badges?.[item.href] ? (
+                <span className="absolute -right-1.5 -top-1 flex size-4 items-center justify-center rounded-full bg-destructive text-[9px] font-semibold text-destructive-foreground">
+                  {badges[item.href] > 9 ? "9+" : badges[item.href]}
+                </span>
+              ) : null}
+            </span>
             {item.label}
           </Link>
         ))}

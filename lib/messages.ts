@@ -77,8 +77,14 @@ export async function translateMessageText(
   }
 }
 
-/** Mark all messages on a child's thread that the current user didn't send
- *  as read. Best-effort. */
+/**
+ * Mark all messages on a child's thread that the current user didn't send as
+ * read. Meant to be invoked client-side (see components/messages/mark-read.tsx)
+ * rather than awaited during a page's render: calling it as a genuine action
+ * lets `revalidatePath` refresh the shared (app) layout's unread badge, which
+ * a plain awaited call during a Server Component's render would not do —
+ * layouts persist across sibling navigations and don't re-run on their own.
+ */
 export async function markThreadRead(childId: string) {
   const profile = await requireProfile()
   const supabase = await createClient()
@@ -88,4 +94,6 @@ export async function markThreadRead(childId: string) {
     .eq("child_id", childId)
     .is("read_at", null)
     .neq("sender_id", profile.id)
+
+  revalidatePath(profile.role === "parent" ? "/parent" : "/teacher", "layout")
 }

@@ -1,6 +1,7 @@
 import { requireRole } from "@/lib/auth"
 import { getParentChildren } from "@/lib/parent"
 import { getThreadMessages } from "@/lib/thread"
+import { MarkRead } from "@/components/messages/mark-read"
 import { PageHeader } from "@/components/page-header"
 import { MessageList } from "@/components/messages/message-list"
 import { MessageCompose } from "@/components/messages/message-compose"
@@ -23,6 +24,9 @@ export default async function ParentMessagesPage() {
 
   return (
     <>
+      {children.map((c) => (
+        <MarkRead key={c.id} childId={c.id} />
+      ))}
       <RealtimeRefresh table="messages" channel="parent-messages" />
       <PageHeader
         title="Messages"

@@ -5,6 +5,7 @@ import { ChevronLeft } from "lucide-react"
 import { requireRole } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
 import { getThreadMessages } from "@/lib/thread"
+import { MarkRead } from "@/components/messages/mark-read"
 import { PageHeader } from "@/components/page-header"
 import { MessageList } from "@/components/messages/message-list"
 import { MessageCompose } from "@/components/messages/message-compose"
@@ -32,6 +33,7 @@ export default async function TeacherThreadPage({
 
   return (
     <>
+      <MarkRead childId={childId} />
       <RealtimeRefresh table="messages" channel={`teacher-thread-${childId}`} />
       <PageHeader title={child.full_name} description="Message thread" />
       <Link
