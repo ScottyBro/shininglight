@@ -41,12 +41,18 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   const isAuthRoute =
-    pathname.startsWith("/login") || pathname.startsWith("/signup")
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/signup") ||
+    pathname.startsWith("/forgot-password")
   const isPublicRoute =
     isAuthRoute ||
     pathname === "/" ||
     pathname.startsWith("/auth") ||
-    pathname.startsWith("/api/health")
+    pathname.startsWith("/api/health") ||
+    // Reachable via a password-recovery email link, which establishes a
+    // session — must NOT be swept up by the "already signed in" redirect
+    // below the way /login and /signup are.
+    pathname.startsWith("/reset-password")
 
   // Unauthenticated user trying to reach a protected route -> login.
   if (!user && !isPublicRoute) {

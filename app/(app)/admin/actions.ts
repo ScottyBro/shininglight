@@ -80,6 +80,39 @@ export async function createUserAccount(
   }
 }
 
+const resetPasswordSchema = z.object({
+  user_id: uuidField(),
+  password: z.string().min(8, "Temporary password must be at least 8 characters."),
+})
+
+/**
+ * Set a new temporary password for an existing account. There is no public
+ * sign-up and self-service reset depends on email delivery being configured,
+ * so this is the front-desk fallback: hand the person a new temp password
+ * directly.
+ */
+export async function resetUserPassword(
+  _prev: FormState,
+  formData: FormData
+): Promise<FormState> {
+  await requireRole("admin")
+  const parsed = resetPasswordSchema.safeParse({
+    user_id: formData.get("user_id"),
+    password: formData.get("password"),
+  })
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input." }
+  }
+
+  const admin = createAdminClient()
+  const { error } = await admin.auth.admin.updateUserById(parsed.data.user_id, {
+    password: parsed.data.password,
+  })
+  if (error) return { error: error.message }
+
+  return { message: "Password reset. Share the new temporary password." }
+}
+
 // --- Shared validation ------------------------------------------------------
 
 const emergencyContactSchema = z.object({

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { PageHeader } from "@/components/page-header"
 import { CreateUser } from "@/components/admin/create-user"
 import { PeopleLink } from "@/components/admin/people-link"
+import { ResetPasswordButton } from "@/components/admin/reset-password-button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
@@ -70,12 +71,18 @@ function PeopleColumn({
           <p className="text-muted-foreground">None yet.</p>
         ) : (
           people.map((p) => (
-            <div key={p.id} className="rounded-lg border p-2.5">
-              <div className="font-medium">{p.full_name ?? "Unnamed"}</div>
-              {p.phone ? (
-                <div className="text-xs text-muted-foreground">{p.phone}</div>
-              ) : null}
-              <span className="sr-only">{badge}</span>
+            <div
+              key={p.id}
+              className="flex items-center justify-between gap-2 rounded-lg border p-2.5"
+            >
+              <div className="min-w-0">
+                <div className="font-medium">{p.full_name ?? "Unnamed"}</div>
+                {p.phone ? (
+                  <div className="text-xs text-muted-foreground">{p.phone}</div>
+                ) : null}
+                <span className="sr-only">{badge}</span>
+              </div>
+              <ResetPasswordButton userId={p.id} name={p.full_name ?? "this user"} />
             </div>
           ))
         )}

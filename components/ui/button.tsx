@@ -48,6 +48,7 @@ function Button({
   asChild = false,
   render,
   children,
+  nativeButton,
   ...props
 }: ButtonPrimitive.Props &
   VariantProps<typeof buttonVariants> & {
@@ -67,6 +68,9 @@ function Button({
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       render={resolvedRender}
+      // asChild composes over a non-<button> element (typically a <Link>, an
+      // <a>) — tell Base UI so it doesn't assert native-button semantics on it.
+      nativeButton={nativeButton ?? !asChild}
       {...props}
     >
       {asChild ? undefined : children}
