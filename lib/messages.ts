@@ -6,11 +6,12 @@ import { z } from "zod"
 import { requireProfile } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
 import { draftMessage, translateText } from "@/lib/ai"
+import { uuidField } from "@/lib/validation"
 
 export type MessageState = { error?: string; ok?: number }
 
 const schema = z.object({
-  child_id: z.string().uuid(),
+  child_id: uuidField(),
   body: z.string().trim().min(1, "Write a message first.").max(4000),
 })
 

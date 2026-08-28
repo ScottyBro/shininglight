@@ -7,6 +7,7 @@ import { z } from "zod"
 import { requireRole } from "@/lib/auth"
 import { createAdminClient, createClient } from "@/lib/supabase/server"
 import { parseList } from "@/lib/format"
+import { uuidField } from "@/lib/validation"
 import type { Database, EnrollmentStatus } from "@/lib/types/database"
 
 export type FormState = { error?: string; message?: string }
@@ -301,6 +302,39 @@ export async function assignTeacher(classroomId: string, teacherId: string) {
   revalidatePath("/admin/classrooms")
 }
 
+const updateClassroomSchema = z.object({
+  id: uuidField(),
+  name: z.string().trim().min(1, "Classroom name is required."),
+  max_capacity: z.coerce.number().int().min(1).max(200),
+})
+
+/** Rename a classroom and/or change its capacity. */
+export async function updateClassroomDetails(
+  _prev: FormState,
+  formData: FormData
+): Promise<FormState> {
+  await requireRole("admin")
+  const parsed = updateClassroomSchema.safeParse({
+    id: formData.get("id"),
+    name: formData.get("name"),
+    max_capacity: formData.get("max_capacity"),
+  })
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input." }
+  }
+
+  const { id, name, max_capacity } = parsed.data
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from("classrooms")
+    .update({ name, max_capacity })
+    .eq("id", id)
+  if (error) return { error: error.message }
+
+  revalidatePath("/admin/classrooms")
+  return { message: "Classroom updated." }
+}
+
 export async function deleteClassroom(classroomId: string) {
   await requireRole("admin")
   const supabase = await createClient()
@@ -308,11 +342,23 @@ export async function deleteClassroom(classroomId: string) {
   revalidatePath("/admin/classrooms")
 }
 
+/** Move a child to a different classroom (or unassign) from the roster view. */
+export async function moveChildClassroom(childId: string, classroomId: string) {
+  await requireRole("admin")
+  const supabase = await createClient()
+  await supabase
+    .from("children")
+    .update({ classroom_id: classroomId === "none" ? null : classroomId })
+    .eq("id", childId)
+  revalidatePath("/admin/classrooms")
+  revalidatePath("/admin/children")
+}
+
 // --- Parent linking ---------------------------------------------------------
 
 const linkSchema = z.object({
-  parent_id: z.string().uuid("Choose a parent."),
-  child_id: z.string().uuid("Choose a child."),
+  parent_id: uuidField("Choose a parent."),
+  child_id: uuidField("Choose a child."),
   relationship: z
     .string()
     .trim()

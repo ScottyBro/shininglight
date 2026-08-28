@@ -5,6 +5,7 @@ import { z } from "zod"
 
 import { requireRole } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
+import { uuidField } from "@/lib/validation"
 
 export type BillingState = { error?: string; message?: string }
 
@@ -54,7 +55,7 @@ export async function deleteFeePlan(id: string) {
 // --- Invoice generation -----------------------------------------------------
 
 const generateSchema = z.object({
-  fee_plan_id: z.string().uuid("Choose a fee plan."),
+  fee_plan_id: uuidField("Choose a fee plan."),
   period_label: z.string().trim().min(1, "Enter a period label, e.g. 'Sep 2026'."),
   due_date: z.string().trim().min(1, "Choose a due date."),
   classroom_id: z
@@ -138,8 +139,8 @@ export async function generateInvoices(
 // --- Payments ---------------------------------------------------------------
 
 const paymentSchema = z.object({
-  invoice_id: z.string().uuid(),
-  child_id: z.string().uuid(),
+  invoice_id: uuidField(),
+  child_id: uuidField(),
   amount: z.coerce.number().positive("Enter an amount greater than zero."),
   method: z.enum(["cash", "ecocash", "bank_transfer", "other"]),
 })

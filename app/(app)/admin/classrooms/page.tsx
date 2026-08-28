@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
 import { PageHeader } from "@/components/page-header"
 import { ClassroomManager } from "@/components/admin/classroom-manager"
+import type { RosterChild } from "@/components/admin/classroom-manager"
 
 export const metadata = { title: "Classrooms" }
 
@@ -20,25 +21,40 @@ export default async function ClassroomsPage() {
         .select("id, full_name")
         .eq("role", "teacher")
         .order("full_name"),
-      supabase.from("children").select("classroom_id"),
+      supabase
+        .from("children")
+        .select("id, full_name, classroom_id, enrollment_status")
+        .neq("enrollment_status", "withdrawn")
+        .order("full_name"),
     ])
 
-  const counts = new Map<string, number>()
-  for (const row of children ?? []) {
-    const cid = (row as { classroom_id: string | null }).classroom_id
-    if (cid) counts.set(cid, (counts.get(cid) ?? 0) + 1)
+  const rosterByRoom = new Map<string, RosterChild[]>()
+  const activeCounts = new Map<string, number>()
+  for (const c of children ?? []) {
+    if (!c.classroom_id) continue
+    const list = rosterByRoom.get(c.classroom_id) ?? []
+    list.push({
+      id: c.id,
+      full_name: c.full_name,
+      enrollment_status: c.enrollment_status,
+    })
+    rosterByRoom.set(c.classroom_id, list)
+    if (c.enrollment_status === "active") {
+      activeCounts.set(c.classroom_id, (activeCounts.get(c.classroom_id) ?? 0) + 1)
+    }
   }
 
   const rooms = (classrooms ?? []).map((r) => ({
     ...r,
-    child_count: counts.get(r.id) ?? 0,
+    child_count: activeCounts.get(r.id) ?? 0,
+    roster: rosterByRoom.get(r.id) ?? [],
   }))
 
   return (
     <>
       <PageHeader
         title="Classrooms"
-        description="Create classrooms and assign a lead teacher to each."
+        description="Create classrooms, assign teachers, and manage rosters."
       />
       <ClassroomManager classrooms={rooms} teachers={teachers ?? []} />
     </>
