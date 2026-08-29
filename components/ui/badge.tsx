@@ -9,18 +9,13 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-primary-foreground shadow-[0_2px_10px_-2px_var(--primary)] [a]:hover:bg-primary/80",
+        default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
         secondary:
           "bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
-        // Solid, saturated fill — deliberately NOT glassy. This variant is
-        // used for allergy/medical safety badges, which the brief calls out
-        // as needing to stay unmistakably prominent, not blend into a
-        // translucent panel.
         destructive:
-          "bg-destructive text-white shadow-[0_2px_10px_-2px_var(--destructive)] focus-visible:ring-destructive/30 [a]:hover:bg-destructive/90",
+          "bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20",
         outline:
-          "glass text-foreground [a]:hover:glass-strong",
+          "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
