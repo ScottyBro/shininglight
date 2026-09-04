@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef } from "react"
 
 import { createUserAccount, type FormState } from "@/app/(app)/admin/actions"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -89,6 +90,17 @@ export function CreateUser() {
               later.
             </p>
           </div>
+          <label className="flex items-start gap-2.5 rounded-lg border p-3 sm:col-span-2">
+            <Checkbox name="sms_opt_in" className="mt-0.5" />
+            <span className="text-sm">
+              <span className="font-medium">Notify by SMS</span>
+              <p className="text-xs text-muted-foreground">
+                Sends a text for published daily reports and new messages
+                from staff — for families without reliable app/data access.
+                Requires a phone number above.
+              </p>
+            </span>
+          </label>
           <div className="sm:col-span-2">
             <Button type="submit" disabled={pending}>
               {pending ? "Creating…" : "Create account"}

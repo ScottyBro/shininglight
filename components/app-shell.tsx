@@ -111,14 +111,16 @@ export function AppShell({
         <div className="mx-auto w-full max-w-5xl p-4 sm:p-6">{children}</div>
       </main>
 
-      {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 flex items-stretch border-t bg-card/95 backdrop-blur md:hidden">
+      {/* Mobile bottom nav — horizontally scrollable so a longer nav list
+          (more roles gain features over time) stays tappable instead of
+          squeezing every icon into an ever-narrower fixed-width bar. */}
+      <nav className="fixed inset-x-0 bottom-0 z-30 flex items-stretch overflow-x-auto border-t bg-card/95 backdrop-blur md:hidden">
         {navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             className={cn(
-              "relative flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium",
+              "relative flex min-w-16 flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium",
               isActive(pathname, item.href)
                 ? "text-primary"
                 : "text-muted-foreground"

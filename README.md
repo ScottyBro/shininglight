@@ -166,6 +166,56 @@ supabase/
 - [x] 10. AI layer (drafted reports, message drafting + translation)
 - [x] 11. PWA + offline (installable, offline reads, attendance/report write queue)
 
+## Beyond the original brief
+
+Four extra features, added on top of the 11-step build:
+
+- **Staff scheduling** — Admin → Schedule assigns shifts (teacher, date,
+  time, optional classroom); teachers see their own upcoming shifts at
+  Teacher → Schedule.
+- **Developmental milestones** — Admin → Milestones curates a library
+  (seeded with ~26 starter milestones across motor/cognitive/language/social
+  domains); teachers record progress per child at Teacher → Milestones;
+  parents get a read-only view at Parent → Milestones.
+- **Classroom photo gallery** — a running, classroom-wide album (Teacher →
+  Gallery to upload, Parent → Gallery to view). Because it's shared across
+  every family in a room, each child has a "shared classroom photos" consent
+  toggle in their profile (off by default, in the Edit tab's Safety &
+  medical card). **This is a policy signal for staff, not a technical
+  filter** — there's no face-tagging, so a child without consent isn't
+  automatically cropped out of a group photo; the teacher just sees a
+  reminder banner naming who to keep out of frame before taking/uploading
+  photos.
+- **SMS notifications** — an opt-in per person (set at account creation, or
+  toggled later from Admin → People) texts a family when a daily report is
+  published or a staff member sends them a message. **Shipped disconnected
+  by design**: `lib/sms.ts` is a provider-agnostic interface that logs what
+  it would send instead of actually sending, until you configure a real
+  gateway. To go live, pick one and set its env vars:
+  - [Africa's Talking](https://africastalking.com) (recommended for
+    Zimbabwe/Africa rates): `SMS_PROVIDER=africastalking`,
+    `AFRICASTALKING_API_KEY`, `AFRICASTALKING_USERNAME`
+  - [Twilio](https://www.twilio.com) (global): `SMS_PROVIDER=twilio`,
+    `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`
+
+  Then replace the stub branch in `lib/sms.ts`'s `sendSms()` with a real API
+  call — nothing else in the app needs to change.
+
+### Upgrading an existing deployment to get these four features
+
+If your Supabase project already has migrations 0001–0003 applied (e.g. the
+one behind your live Vercel deployment), **run `supabase/upgrade_0004_new_features.sql`
+in the SQL Editor before deploying this code** — it adds the new tables
+(`shifts`, `milestones`, `child_milestones`, `gallery_photos`) and two new
+columns on existing tables (`children.gallery_consent`,
+`profiles.sms_opt_in`). Skipping this first will break already-working pages
+(the children list, teacher roster, attendance) the moment the new code
+ships, since they now select those new columns. Run it once — see the
+warning comment at the top of the file for why re-running it isn't safe.
+
+A brand-new project can just use `supabase/setup.sql` as before — it already
+includes this migration.
+
 ## PWA & offline
 
 - Installable ("Add to home screen") via `public/manifest.webmanifest` + app

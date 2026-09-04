@@ -10,6 +10,8 @@ export type ReportStatus = "draft" | "published"
 export type BillingCycle = "monthly" | "termly" | "annual"
 export type InvoiceStatus = "unpaid" | "partial" | "paid" | "overdue"
 export type PaymentMethod = "cash" | "ecocash" | "bank_transfer" | "other"
+export type MilestoneDomain = "motor" | "cognitive" | "language" | "social"
+export type MilestoneStatus = "not_started" | "in_progress" | "achieved"
 
 export type Json =
   | string
@@ -58,6 +60,7 @@ export interface Database {
           full_name: string | null
           phone: string | null
           preferred_language: string | null
+          sms_opt_in: boolean
           created_at: string
         }
         Insert: {
@@ -66,6 +69,7 @@ export interface Database {
           full_name?: string | null
           phone?: string | null
           preferred_language?: string | null
+          sms_opt_in?: boolean
           created_at?: string
         }
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>
@@ -101,6 +105,7 @@ export interface Database {
           authorized_pickups: AuthorizedPickup[]
           classroom_id: string | null
           enrollment_status: EnrollmentStatus
+          gallery_consent: boolean
           enrolled_at: string | null
           created_at: string
         }
@@ -115,6 +120,7 @@ export interface Database {
           authorized_pickups?: AuthorizedPickup[]
           classroom_id?: string | null
           enrollment_status?: EnrollmentStatus
+          gallery_consent?: boolean
           enrolled_at?: string | null
           created_at?: string
         }
@@ -285,6 +291,100 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["payments"]["Insert"]>
         Relationships: []
       }
+      shifts: {
+        Row: {
+          id: string
+          teacher_id: string
+          classroom_id: string | null
+          date: string
+          start_time: string
+          end_time: string
+          notes: string | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          teacher_id: string
+          classroom_id?: string | null
+          date: string
+          start_time: string
+          end_time: string
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["shifts"]["Insert"]>
+        Relationships: []
+      }
+      milestones: {
+        Row: {
+          id: string
+          domain: MilestoneDomain
+          title: string
+          description: string | null
+          min_age_months: number
+          max_age_months: number
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          domain: MilestoneDomain
+          title: string
+          description?: string | null
+          min_age_months: number
+          max_age_months: number
+          sort_order?: number
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["milestones"]["Insert"]>
+        Relationships: []
+      }
+      child_milestones: {
+        Row: {
+          id: string
+          child_id: string
+          milestone_id: string
+          status: MilestoneStatus
+          notes: string | null
+          achieved_at: string | null
+          recorded_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          child_id: string
+          milestone_id: string
+          status?: MilestoneStatus
+          notes?: string | null
+          achieved_at?: string | null
+          recorded_by?: string | null
+          updated_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["child_milestones"]["Insert"]>
+        Relationships: []
+      }
+      gallery_photos: {
+        Row: {
+          id: string
+          classroom_id: string
+          path: string
+          caption: string | null
+          uploaded_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          classroom_id: string
+          path: string
+          caption?: string | null
+          uploaded_by?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["gallery_photos"]["Insert"]>
+        Relationships: []
+      }
     }
     Views: {
       child_balances: {
@@ -310,6 +410,14 @@ export interface Database {
         Args: { child: string }
         Returns: boolean
       }
+      teaches_classroom: {
+        Args: { room: string }
+        Returns: boolean
+      }
+      parent_has_child_in_classroom: {
+        Args: { room: string }
+        Returns: boolean
+      }
     }
     Enums: {
       user_role: UserRole
@@ -318,6 +426,8 @@ export interface Database {
       billing_cycle: BillingCycle
       invoice_status: InvoiceStatus
       payment_method: PaymentMethod
+      milestone_domain: MilestoneDomain
+      milestone_status: MilestoneStatus
     }
   }
 }
@@ -334,4 +444,8 @@ export type Message = Tables["messages"]["Row"]
 export type FeePlan = Tables["fee_plans"]["Row"]
 export type Invoice = Tables["invoices"]["Row"]
 export type Payment = Tables["payments"]["Row"]
+export type Shift = Tables["shifts"]["Row"]
+export type Milestone = Tables["milestones"]["Row"]
+export type ChildMilestone = Tables["child_milestones"]["Row"]
+export type GalleryPhoto = Tables["gallery_photos"]["Row"]
 export type ChildBalance = Database["public"]["Views"]["child_balances"]["Row"]

@@ -9,6 +9,7 @@ export type RosterChild = {
   medical_notes: string | null
   authorized_pickups: AuthorizedPickup[]
   classroom_id: string | null
+  gallery_consent: boolean
 }
 
 export type TeacherRoster = {
@@ -35,7 +36,7 @@ export async function getTeacherRoster(teacherId: string): Promise<TeacherRoster
   const { data: children } = await supabase
     .from("children")
     .select(
-      "id, full_name, photo_url, allergies, medical_notes, authorized_pickups, classroom_id"
+      "id, full_name, photo_url, allergies, medical_notes, authorized_pickups, classroom_id, gallery_consent"
     )
     .in("classroom_id", ids)
     .eq("enrollment_status", "active")

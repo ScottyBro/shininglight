@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/page-header"
 import { CreateUser } from "@/components/admin/create-user"
 import { PeopleLink } from "@/components/admin/people-link"
 import { ResetPasswordButton } from "@/components/admin/reset-password-button"
+import { SmsToggle } from "@/components/admin/sms-toggle"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
@@ -16,7 +17,7 @@ export default async function PeoplePage() {
   const [{ data: profiles }, { data: children }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, full_name, phone, role")
+      .select("id, full_name, phone, role, sms_opt_in")
       .order("full_name"),
     supabase.from("children").select("id, full_name").order("full_name"),
   ])
@@ -57,7 +58,12 @@ function PeopleColumn({
   badge,
 }: {
   title: string
-  people: { id: string; full_name: string | null; phone: string | null }[]
+  people: {
+    id: string
+    full_name: string | null
+    phone: string | null
+    sms_opt_in: boolean
+  }[]
   badge: string
 }) {
   return (
@@ -82,7 +88,14 @@ function PeopleColumn({
                 ) : null}
                 <span className="sr-only">{badge}</span>
               </div>
-              <ResetPasswordButton userId={p.id} name={p.full_name ?? "this user"} />
+              <div className="flex items-center gap-0.5">
+                <SmsToggle
+                  userId={p.id}
+                  name={p.full_name ?? "this user"}
+                  optedIn={p.sms_opt_in}
+                />
+                <ResetPasswordButton userId={p.id} name={p.full_name ?? "this user"} />
+              </div>
             </div>
           ))
         )}

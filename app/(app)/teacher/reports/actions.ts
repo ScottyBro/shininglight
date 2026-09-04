@@ -7,6 +7,7 @@ import { z } from "zod"
 import { requireRole } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
 import { schoolToday } from "@/lib/date"
+import { notifyChildParentsBySms } from "@/lib/sms"
 import type { Database } from "@/lib/types/database"
 
 export type ReportState = { error?: string; message?: string }
@@ -131,6 +132,17 @@ export async function saveDailyReport(
   revalidatePath(`/teacher/reports/${childId}`)
 
   if (intent === "publish") {
+    const { data: child } = await supabase
+      .from("children")
+      .select("full_name")
+      .eq("id", childId)
+      .single()
+    const firstName = child?.full_name?.split(" ")[0] ?? "Your child"
+    await notifyChildParentsBySms(
+      supabase,
+      childId,
+      `Shining Light: ${firstName}'s daily report is ready. Open the app to view it.`
+    )
     redirect("/teacher/reports")
   }
   return { message: "Draft saved." }

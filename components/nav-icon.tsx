@@ -1,12 +1,15 @@
 import {
   Baby,
+  CalendarClock,
   ClipboardCheck,
   Home,
+  Images,
   LayoutDashboard,
   MessageCircle,
   NotebookPen,
   Receipt,
   School,
+  Sparkles,
   Sun,
   Users,
   type LucideIcon,
@@ -14,13 +17,16 @@ import {
 
 const ICONS: Record<string, LucideIcon> = {
   Baby,
+  CalendarClock,
   ClipboardCheck,
   Home,
+  Images,
   LayoutDashboard,
   MessageCircle,
   NotebookPen,
   Receipt,
   School,
+  Sparkles,
   Sun,
   Users,
 }

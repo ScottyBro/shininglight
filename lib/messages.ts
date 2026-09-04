@@ -6,6 +6,7 @@ import { z } from "zod"
 import { requireProfile } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
 import { draftMessage, translateText } from "@/lib/ai"
+import { notifyChildParentsBySms } from "@/lib/sms"
 import { uuidField } from "@/lib/validation"
 
 export type MessageState = { error?: string; ok?: number }
@@ -36,6 +37,18 @@ export async function sendMessage(
     body: parsed.data.body,
   })
   if (error) return { error: error.message }
+
+  // Staff message -> notify the family by SMS as a backstop for parents
+  // without reliable app/data access. Not the other direction: a parent's
+  // own message doesn't need to SMS the teacher, who is already using the app.
+  if (profile.role !== "parent") {
+    const senderName = profile.full_name?.split(" ")[0] ?? "Your teacher"
+    await notifyChildParentsBySms(
+      supabase,
+      parsed.data.child_id,
+      `Shining Light: new message from ${senderName}. Open the app to read it.`
+    )
+  }
 
   revalidatePath("/parent/messages")
   revalidatePath("/teacher/messages")

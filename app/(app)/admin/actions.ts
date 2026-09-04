@@ -30,6 +30,10 @@ const createUserSchema = z.object({
     .transform((v) => (v ? v : null)),
   role: z.enum(["admin", "teacher", "parent"]),
   password: z.string().min(8, "Temporary password must be at least 8 characters."),
+  sms_opt_in: z
+    .string()
+    .optional()
+    .transform((v) => v === "on"),
 })
 
 /**
@@ -50,12 +54,13 @@ export async function createUserAccount(
     phone: formData.get("phone") ?? undefined,
     role: formData.get("role"),
     password: formData.get("password"),
+    sms_opt_in: formData.get("sms_opt_in") ?? undefined,
   })
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." }
   }
 
-  const { email, password, full_name, phone, role } = parsed.data
+  const { email, password, full_name, phone, role, sms_opt_in } = parsed.data
   const admin = createAdminClient()
 
   const { data, error } = await admin.auth.admin.createUser({
@@ -72,7 +77,7 @@ export async function createUserAccount(
   // authoritative even if metadata handling ever changes).
   await admin
     .from("profiles")
-    .upsert({ id: data.user.id, role, full_name, phone }, { onConflict: "id" })
+    .upsert({ id: data.user.id, role, full_name, phone, sms_opt_in }, { onConflict: "id" })
 
   revalidatePath("/admin/people")
   return {
@@ -111,6 +116,16 @@ export async function resetUserPassword(
   if (error) return { error: error.message }
 
   return { message: "Password reset. Share the new temporary password." }
+}
+
+/** Toggle whether a person receives SMS notifications (published reports,
+ *  new messages from staff). Requires a phone number to actually be useful;
+ *  the toggle itself doesn't validate that — see the People page hint. */
+export async function toggleSmsOptIn(userId: string, optIn: boolean) {
+  await requireRole("admin")
+  const supabase = await createClient()
+  await supabase.from("profiles").update({ sms_opt_in: optIn }).eq("id", userId)
+  revalidatePath("/admin/people")
 }
 
 // --- Shared validation ------------------------------------------------------
@@ -166,6 +181,10 @@ const childCoreSchema = z.object({
   enrollment_status: z
     .enum(["active", "waitlisted", "withdrawn"])
     .default("active"),
+  gallery_consent: z
+    .string()
+    .optional()
+    .transform((v) => v === "on"),
 })
 
 /** Upload an optional photo File to `child-photos`; return its object path. */
@@ -198,6 +217,7 @@ export async function enrollChild(
     medical_notes: formData.get("medical_notes") ?? undefined,
     classroom_id: formData.get("classroom_id") ?? undefined,
     enrollment_status: formData.get("enrollment_status") ?? "active",
+    gallery_consent: formData.get("gallery_consent") ?? undefined,
   })
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." }
@@ -253,6 +273,7 @@ export async function updateChild(
     medical_notes: formData.get("medical_notes") ?? undefined,
     classroom_id: formData.get("classroom_id") ?? undefined,
     enrollment_status: formData.get("enrollment_status") ?? "active",
+    gallery_consent: formData.get("gallery_consent") ?? undefined,
   })
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." }

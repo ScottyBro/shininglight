@@ -6,6 +6,7 @@ import { Plus, Trash2 } from "lucide-react"
 import { enrollChild, updateChild, type FormState } from "@/app/(app)/admin/actions"
 import { downscaleInputFiles } from "@/lib/image"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -199,6 +200,21 @@ export function ChildForm({
               placeholder="Asthma — inhaler in bag. Mild eczema."
             />
           </div>
+          <label className="flex items-start gap-2.5 rounded-lg border p-3">
+            <Checkbox
+              name="gallery_consent"
+              defaultChecked={child?.gallery_consent ?? false}
+              className="mt-0.5"
+            />
+            <span className="text-sm">
+              <span className="font-medium">Ok to include in shared classroom photos</span>
+              <p className="text-xs text-muted-foreground">
+                Off by default. When off, staff are reminded to keep this
+                child out of frame in the classroom&apos;s shared photo
+                gallery (visible to every family in that room).
+              </p>
+            </span>
+          </label>
         </CardContent>
       </Card>
 
