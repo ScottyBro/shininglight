@@ -1,7 +1,12 @@
-import { Sun } from "lucide-react"
+import Image from "next/image"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * The crest only — public/logo-mark.png is the school logo with its
+ * "PRE-SCHOOL" wordmark cropped off, since every caller pairs the mark with
+ * the school name as live text and would otherwise show it twice.
+ */
 export function BrandMark({
   className,
   size = 40,
@@ -10,15 +15,15 @@ export function BrandMark({
   size?: number
 }) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm",
-        className
-      )}
+    <Image
+      src="/logo-mark.png"
+      alt=""
+      width={size}
+      height={size}
+      priority
+      className={cn("object-contain", className)}
       style={{ width: size, height: size }}
-    >
-      <Sun style={{ width: size * 0.6, height: size * 0.6 }} strokeWidth={2.5} />
-    </span>
+    />
   )
 }
 
